@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app_kjs/Components/AuthPage.dart';
+import 'package:quiz_app_kjs/Components/Authentication.dart';
 import 'package:quiz_app_kjs/Components/Home.dart';
 import 'onboarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -28,16 +32,32 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+        providers: [
+    Provider<FirebaseAuthService>(create: (_) => FirebaseAuthService()),
+          FutureProvider<Map<String, dynamic>?>(
+            create: (context) async {
+              var user = Provider.of<FirebaseAuthService>(context, listen: false).currentUser();
+              var userDoc = await FirebaseFirestore.instance
+                  .collection("Users")
+                  .doc(user!.email)
+                  .get();
+              return userDoc.data();
+            },
+            initialData: {},
+          ),
+        ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const AuthPage(),
+        routes: {
+            "/home": (context) => Home_Page(),
+
+          },
       ),
-      home: const OnboardingScreen(),
-      routes: {
-          "/home": (context) => Home_Page(),
-          
-        },
     );
   }
 }
