@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/container.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app_kjs/Components/Authentication.dart';
 
 class DrawerLabel extends StatefulWidget {
   final String text;

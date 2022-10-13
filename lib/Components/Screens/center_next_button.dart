@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:quiz_app_kjs/Components/Authentication.dart';
 
 class CenterNextButton extends StatelessWidget {
   //Instance of FirebaseAuth
@@ -48,43 +50,7 @@ class CenterNextButton extends StatelessWidget {
         curve: Curves.fastOutSlowIn,
       ),
     ));
-    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-    final GoogleSignIn _googleSignIn = GoogleSignIn();
-    Future signInWithGoogle(BuildContext context) async {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser!.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      final authResult = await _firebaseAuth.signInWithCredential(credential);
-      final user = authResult.user;
-      final CollectionReference users =
-          FirebaseFirestore.instance.collection('Users');
-      // Future<void> createFirebaseDocument(User user) {
-      //   return
-      // }
 
-      // add the users document if not ready
-      users.doc(user!.email).get().then(
-        (DocumentSnapshot documentSnapshot) async {
-          if (!documentSnapshot.exists) {
-            await users.doc(user.email).set({
-              "name": user.displayName,
-              "email": user.email,
-              "phoneFromAuth": user.phoneNumber ?? null,
-            }).catchError((error) => print("Failed to add user: $error"));
-            Navigator.pushNamed(context, "/setProfile");
-          } else {
-            Navigator.pushNamed(context, "/home");
-            Fluttertoast.showToast(msg: "Sign in successful!");
-          }
-        },
-      );
-
-      // return _userFromFirebase(user);
-    }
 
     return Padding(
       padding:
@@ -141,9 +107,12 @@ class CenterNextButton extends StatelessWidget {
                     child: _signUpMoveAnimation.value > 0.7
                         ? InkWell(
                             key: ValueKey('Sign Up button'),
-                            onTap: () {
+                            onTap: () async{
                               //functionality
-                              signInWithGoogle(context);
+                              final authServiceProvider =
+                              Provider.of<FirebaseAuthService>(context,
+                                  listen: false);
+                              await authServiceProvider.signInWithGoogle(context);
                             },
                             child: Padding(
                               padding: EdgeInsets.only(left: 16.0, right: 16.0),
